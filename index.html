@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Maya Motor Club: ride reviews</title>
+<style>
+:root{--bg:#f5ecd9;--card:#fffaf0;--ink:#1c1a17;--mute:#6b6254;--red:#b3261e;--gold:#c9a227;--line:#d9ccb0;--chrome:#b8bcc2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17140f;--card:#221d16;--ink:#f3e9d2;--mute:#b3a68c;--red:#e0584f;--gold:#e0b93c;--line:#3b3326;--chrome:#8a8f96}}
+:root[data-theme="dark"]{--bg:#17140f;--card:#221d16;--ink:#f3e9d2;--mute:#b3a68c;--red:#e0584f;--gold:#e0b93c;--line:#3b3326;--chrome:#8a8f96}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Georgia,"Times New Roman",serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+header{text-align:center;padding:18px 0 8px;border-bottom:3px double var(--gold);margin-bottom:18px}
+.badge{display:inline-block;background:var(--ink);color:var(--bg);letter-spacing:.2em;font:700 11px/1 system-ui,sans-serif;padding:6px 10px;border-radius:3px;border:1px solid var(--chrome)}
+h1{margin:10px 0 2px;font-size:clamp(26px,7vw,38px);color:var(--red);letter-spacing:.02em}
+header p{margin:0;color:var(--mute);font-style:italic}
+.card{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--red);border-radius:8px;padding:16px;margin:14px 0;animation:rise .35s ease both}
+.card h2{font-size:18px;margin:0 0 10px}
+.card .n{color:var(--red);font:700 12px system-ui,sans-serif;letter-spacing:.15em;display:block;margin-bottom:4px}
+.pick{display:grid;gap:10px}
+.big{font:inherit;text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--ink);border-radius:8px;padding:16px;cursor:pointer;transition:transform .15s,border-color .15s,background .2s}
+.big:hover{border-color:var(--red);transform:translateY(-2px)}.big b{display:block;color:var(--red);font-size:18px}.big span{color:var(--mute);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 15px system-ui,sans-serif;background:transparent;color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:9px 14px;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .15s}
+.chip:hover{border-color:var(--gold)}
+.chip.on{background:var(--red);border-color:var(--red);color:#fff8ea;animation:pop .4s ease}
+input[type=text],textarea{width:100%;font:16px system-ui,sans-serif;padding:11px;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);margin-top:8px}
+input:focus,textarea:focus,.chip:focus-visible,.big:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+input[type=number],input[type=date]{font:16px system-ui,sans-serif;padding:11px;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);margin-top:8px;color-scheme:light dark}
+.sub{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+.sub h2{font-size:16px;margin:0 0 8px}
+.hint{color:var(--red);font:14px system-ui,sans-serif;margin:10px 0 0;min-height:1.2em}
+.react{margin:12px 0 0;padding:9px 12px;border-radius:6px;background:rgba(201,162,39,.15);border-left:3px solid var(--gold);font-style:italic;font-size:15px;animation:rise .3s ease both}
+.react::before{content:"Maya: ";font:700 12px system-ui,sans-serif;font-style:normal;color:var(--red);letter-spacing:.08em;text-transform:uppercase}
+.dial{display:block;margin:0 auto 6px;width:200px;max-width:70%}
+.dial .track{stroke:var(--line)}.dial .arc{stroke:var(--red);transition:stroke-dashoffset .7s cubic-bezier(.3,.8,.3,1)}
+.dial text{fill:var(--ink);font:700 34px Georgia,serif}.dial .sub{fill:var(--mute);font:12px system-ui,sans-serif}
+.nums{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.nums .chip{padding:10px 0;text-align:center}
+.send{width:100%;margin-top:8px;font:700 17px system-ui,sans-serif;background:var(--red);color:#fff8ea;border:2px solid var(--ink);border-radius:8px;padding:14px;cursor:pointer;transition:transform .15s}
+.send:hover{transform:translateY(-2px)}
+.link{background:none;border:0;color:var(--mute);text-decoration:underline;font:14px system-ui,sans-serif;cursor:pointer;padding:6px 0}
+.done{text-align:center}.done svg{width:90px;height:90px}
+.done .ring{stroke:var(--gold);stroke-dasharray:176;stroke-dashoffset:176;animation:draw .6s .1s ease forwards}
+.done .tick{stroke:var(--red);stroke-dasharray:40;stroke-dashoffset:40;animation:draw .4s .6s ease forwards}
+pre{white-space:pre-wrap;text-align:left;background:var(--bg);border:1px dashed var(--chrome);border-radius:6px;padding:12px;font:13px/1.5 ui-monospace,Menlo,monospace}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row .send{flex:1;min-width:150px;margin:0}
+.ghost{background:transparent;color:var(--ink)}
+.note{font:13px system-ui,sans-serif;color:var(--mute)}
+.speedo{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;align-items:center;gap:12px;background:var(--bg);border-bottom:1px solid var(--line);padding:6px 4px;margin:0 0 6px}
+.speedo svg{width:132px;flex:none}.speedo .face{fill:var(--card);stroke:var(--chrome);stroke-width:4}.speedo .tk{stroke:var(--mute);stroke-width:2}.speedo .redz{stroke:var(--red);stroke-width:5;fill:none}
+.speedo .nd{stroke:var(--red);stroke-width:3;stroke-linecap:round;transform-origin:100px 100px;transform:rotate(-90deg);transition:transform .7s cubic-bezier(.3,1.5,.5,1)}
+.speedo .hub{fill:var(--gold);stroke:var(--ink);stroke-width:2}
+.speedo b{display:block;font:700 22px Georgia,serif;color:var(--ink)}.speedo span{font:13px system-ui,sans-serif;color:var(--mute)}
+[hidden]{display:none!important}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pop{50%{transform:scale(1.08)}}
+@keyframes shake{20%{transform:translateX(-3px)}40%{transform:translateX(3px)}60%{transform:translateX(-2px)}80%{transform:translateX(2px)}}
+.speedo svg.sh{animation:shake .4s}
+.hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
+@keyframes draw{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <span class="badge">MAYA MOTOR CLUB</span>
+  <h1>Ride Reviews</h1>
+  <p>Hi, I'm Maya, a Yamaha XSR 155. Tell me how our ride went!</p>
+</header>
+<div id="app"></div>
+</main>
+<script>
+// Set the address that should receive reviews. Reviews open in the visitor's own email app;
+// this page cannot send email by itself (that needs a backend or email service).
+const RECIPIENT = "mayathexsr@gmail.com";
+const OWNER = "Sai Krish";
+// Optional: URL of your own email service (Apps Script, Formspree, serverless function). It works when this file is
+// self-hosted on your own site; published claude.ai pages block outside requests, so they fall back to the email app.
+// The page only says "Sent" if the service replies OK.
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbzwZueTpJyTmnQY7lQ312IdY_dffhQu70GJ3FsOIAcT9i92Jjq1ZhwE924gnoR8FSzqBw/exec";
+
+const RELS = ["Family member","Friend","Partner","Colleague","Other"];
+const PURPOSE = {id:"purpose",grp:"ride",q:"Why did you ride with us?",o:["Leisure ride","Trip or outing","Errand or commute","Event or function","Just for fun","Other"],r:["Leisure it is. My favourite kind.","Adventures are my thing!","Happy to be useful.","I do like an occasion.","Fun is what I'm for.","Interesting! Tell me more."]};
+const KM = {id:"km",grp:"ride",t:"num",q:"How many kilometres did you travel?",r:["A short hop, still counts!","Nice little spin!","Now that's a proper ride!"]};
+const TIME = {id:"time",grp:"ride",opt:true,q:"How long was the ride? (optional)",o:["Under 1 hour","1 to 3 hours","3 to 6 hours","Full day or more"],r:["Quick and sweet.","A proper spin.","A long, lovely ride.","Now we're talking, a full day out!"]};
+const NEXT = {id:"next",t:"date",q:"When should the next ride be?",r:["Marked in my diary! I'll be ready.","No rush. I'll be right here."]};
+const LIKE = {id:"like",fu:["Maya is okay","I don't like Maya"],q:"Do you like Maya?",o:["I love Maya","I like Maya","Maya is okay","I don't like Maya"],r:["Aww, I love you too!","Thank you! That makes me happy.","Okay. I will try to be better.","That makes me sad. I will try harder."]};
+const PATHS = {
+  pillion: {title:`Pillion review of ${OWNER}'s riding`, qs:[
+    {id:"ride",grp:"ride",t:"text",q:"Which ride was this? (optional, e.g. Sunday ghat run)"},
+    PURPOSE, KM, TIME,
+    {id:"rating",t:"dial",q:`Overall, how was the ride with ${OWNER}?`},
+    {id:"smooth",q:"How smooth was the riding and braking?",o:["Silky","Okay","A bit jerky"],r:["Smooth hands and gentle stops. I approve!","Fair enough, there's room to polish.","I felt that. Smoother next time, I promise."]},
+    {id:"pace",q:"How did the speed feel?",o:["Too slow","Just right","Too fast"],r:["I can stretch my legs a bit.","The sweet spot.","Easy now, there's no race."]},
+    {id:"safe",fu:["Sometimes","Not really"],q:"How safe did you feel?",o:["Always","Mostly","Sometimes","Not really"],r:["That's the best thing to hear.","Good, aiming for 'always'.","Thanks for being honest, we'll work on it.","Thank you for telling us. That matters most."]},
+    {id:"pass",t:"multi",q:`Anything to pass on to ${OWNER}?`,o:["Ride a bit slower","Brake more gently","Keep up the great riding","Take more breaks","Plan more rides","Watch out for potholes"],r:`Noted! I'll make sure ${OWNER} hears it.`},
+    NEXT, LIKE]},
+  rider: {title:"Rider review of Maya", qs:[
+    {id:"ride",grp:"ride",t:"text",q:"Which ride was this? (optional, e.g. Sunday ghat run)"},
+    PURPOSE, KM, TIME,
+    {id:"rating",t:"dial",q:"Overall, how was riding Maya?"},
+    {id:"handle",q:"How was the handling?",o:["Nimble","Balanced","Heavy"],r:["Light on my feet, that's me!","Balanced is a fine thing.","Noted. I'll get my setup checked."]},
+    {id:"engine",q:"How did the engine feel?",o:["Peppy","Fine","Underpowered"],r:["155cc of attitude.","Steady and honest.","Fair. I'm more of a city sweetheart."]},
+    {id:"comfort",q:"How comfortable was the seat and riding position?",o:["Great","Okay","Tiring"],r:["Comfort counts on long rides.","Okay is a start.","Thanks. I'll get my seat checked."]},
+    {id:"looks",q:"What did you think of her looks?",o:["Head-turner","Nice","Not for me"],r:["Retro-modern and proud of it.","Thank you kindly.","Taste is personal, no hard feelings."]},
+    {id:"notes",t:"text",q:"Anything else to tell Maya or her owner?"},
+    NEXT, LIKE]}
+};
+const MAYA = {
+  pillion: {ride:"Which ride was this? I like remembering our rides.", purpose:"Why did you come along with us?", km:"How many kilometres did we cover with you on board?", time:"How long did we ride? (optional)", rating:`You and ${OWNER} rode me. How was the ride?`, smooth:`Was ${OWNER} smooth with me, and gentle on my brakes?`, pace:"How did the speed feel from my back seat?", safe:"Be honest, did you feel safe on my back seat?", pass:`Anything you'd like me to pass on to ${OWNER}? Pick any, or write your own.`, next:"When's our next ride? Pick a day on the calendar!", like:"Last one, promise: do you like me?"},
+  rider: {ride:"Which ride was this? I like remembering our rides.", purpose:"Why did you take me out?", km:"How far did we go together? (km)", time:"How long did we ride? (optional)", rating:"You rode me! How was it?", handle:"How did I handle in your hands?", engine:"How did my 155cc engine feel?", comfort:"Was my seat and riding position comfy?", looks:"Be kind, what do you think of my looks?", notes:"Anything else you'd like to tell me or my owner?", next:"When's our next ride? Pick a day on the calendar!", like:"Last one, promise: do you like me?"}
+};
+// Maya's first-person wording is shown on screen; the emailed summary keeps the plain question text above.
+const T = q => (MAYA[path] && MAYA[path][q.id]) || q.q;
+function ans(q){
+  const v = st[q.id];
+  if (q.t === "dial") return v + " / 10";
+  if (q.t === "num") return v + " km";
+  if (q.t === "date") return !v || v === "Not sure yet" ? (v || "(no answer)") : new Date(v + "T00:00").toLocaleDateString(undefined, {weekday: "short", day: "numeric", month: "short", year: "numeric"});
+  if (q.t === "multi") return [].concat(v || [], st[q.id + "Txt"] ? ["Own words: " + st[q.id + "Txt"]] : []).join("; ");
+  if (v === "Other") return "Other: " + (st[q.id + "Other"] || "");
+  if (q.fu && q.fu.includes(v) && st[q.id + "Fu"]) return v + " (" + st[q.id + "Fu"] + ")";
+  return v || "(no answer)";
+}
+function isDone(q){
+  const v = st[q.id];
+  if (q.t === "text" || q.opt) return true;
+  if (q.t === "multi") return !!((v && v.length) || (st[q.id + "Txt"] || "").length >= 2);
+  if (q.t === "num") return v !== undefined && +v > 0;
+  if (v === undefined) return false;
+  if (v === "Other") return (st[q.id + "Other"] || "").length >= 2;
+  return true;
+}
+const DIAL_R = [[3,"Rough ride. Tell me what went wrong."],[5,"Hmm, below par. I'll listen."],[7,"A decent ride. Thank you!"],[9,"That's a good one. Smiling here."],[10,"Top marks! Engine purring."]];
+
+const app = document.getElementById("app");
+let path = null, st = {};
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let busy = false;
+const KEY = "mayaReview:";
+function save(){ if (!path || st._done) return; try { localStorage.setItem(KEY + path, JSON.stringify(st)); } catch (e) {} }
+function load(p){ try { const s = JSON.parse(localStorage.getItem(KEY + p)) || {}; delete s._ok; delete s._done; return s; } catch (e) { return {}; } }
+function clearSaved(){ try { localStorage.removeItem(KEY + path); } catch (e) {} }
+["click", "input"].forEach(ev => app.addEventListener(ev, () => setTimeout(save, 0)));
+function rev(v){
+  const nd = $("#nd"); if (!nd) return;
+  speedo.hold = Date.now() + 1000;
+  nd.style.transform = "rotate(" + (-90 + v * 18) + "deg)";
+  const s = nd.closest("svg"); s.classList.remove("sh");
+  if (v === 10) { void s.getBoundingClientRect(); s.classList.add("sh"); }
+  clearTimeout(rev.t); rev.t = setTimeout(speedo, 1050);
+}
+function applySaved(){
+  if (path === "pillion") {
+    if (st.name) $("#pname").value = st.name;
+    if (st.other) $("#other").value = st.other;
+    const b = st.rel && [...app.querySelectorAll("#rels .chip")].find(x => x.dataset.r === st.rel);
+    if (b) b.click(); else if (st.name || st.other) $("#pname").dispatchEvent(new Event("input"));
+  }
+  PATHS[path].qs.forEach(q => {
+    const card = app.querySelector('[data-q="' + q.id + '"]'); if (!card) return;
+    const v = st[q.id];
+    if (q.t === "multi") { if (st[q.id + "Txt"]) card.querySelector("textarea").value = st[q.id + "Txt"]; return; }
+    if (v === undefined || v === "") return;
+    if (q.t === "text") card.querySelector("textarea").value = v;
+    else if (q.t === "num") card.querySelector("input").value = v;
+    else if (q.t === "date") { if (v === "Not sure yet") card.querySelector(".chip").click(); else { card.querySelector("input").value = v; react($(".react", card), q.r[0]); } }
+    else { const b = card.querySelector(q.t === "dial" ? '[data-v="' + v + '"]' : '[data-k="' + q.o.indexOf(v) + '"]'); if (b) b.click(); if (v === "Other" && st[q.id + "Other"]) { const o = card.querySelector(".oth"); if (o) o.value = st[q.id + "Other"]; } if (st[q.id + "Fu"]) { const f = card.querySelector(".fu"); if (f) f.value = st[q.id + "Fu"]; } }
+  });
+  speedo();
+}
+function review(){
+  const hp = $("#hp"); if (hp && hp.value) st._hp = 1;
+  const rows = [];
+  if (path === "pillion") rows.push(["Passenger", st.name], ["Relationship to " + OWNER, st.rel === "Other" ? st.other : st.rel]);
+  PATHS[path].qs.forEach(q => rows.push([q.q, ans(q)]));
+  show(`<div class="card"><span class="n">CHECK YOUR REVIEW</span><h2>Here's what you told me. Ready to send?</h2>${rows.map(r => `<p style="margin:8px 0"><span class="note">${esc(r[0])}</span><br><b>${esc(r[1])}</b></p>`).join("")}<div class="row"><button class="send ghost" id="edit">Edit answers</button><button class="send" id="ok">Looks good</button></div></div>`);
+  $("#edit").onclick = () => start(path);
+  $("#ok").onclick = () => { st._ok = true; submit(); };
+}
+function show(html){ app.innerHTML = html; app.firstElementChild && app.firstElementChild.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"}); }
+
+function home(){
+  path = null; st = {};
+  show(`<div class="card"><span class="n">START HERE</span><h2>Hi, I'm Maya! How did we meet on the road?</h2>
+  <div class="pick">
+   <button class="big" data-p="pillion"><b>I was the passenger</b><span>I sat behind ${esc(OWNER)}</span></button>
+   <button class="big" data-p="rider"><b>I was the rider</b><span>I rode Maya</span></button>
+  </div></div>`);
+  app.querySelectorAll("[data-p]").forEach(b => b.onclick = () => start(b.dataset.p));
+}
+
+function start(p){
+  path = p; st = load(p);
+  const P = PATHS[p];
+  let h = `<button class="link" id="back">&larr; Choose a different review</button>
+  <div class="card"><span class="n">${p === "pillion" ? "PILLION" : "RIDER"}</span><h2>${esc(P.title)}</h2><p style="margin:6px 0 0;font-style:italic;color:var(--mute)">${p === "pillion" ? "Hop on! First, tell me who you are so I know who sat behind " + esc(OWNER) + "." : "Thanks for riding me! I'll ask a few quick things."}</p></div>`;
+  if (p === "pillion") {
+    h += `<div class="card" id="who"><span class="n">FIRST, WHO ARE YOU?</span><h2>Hello! Who sat on my back seat with ${esc(OWNER)}?</h2>
+      <label for="pname" class="note">Your name (required)</label>
+      <input type="text" id="pname" autocomplete="name" maxlength="60">
+      <p class="note" style="margin:14px 0 0">How do you know ${esc(OWNER)}? (required)</p>
+      <div class="chips" id="rels" role="group" aria-label="Relationship" style="margin-top:8px">${RELS.map(r => `<button class="chip" data-r="${r}" aria-pressed="false">${r}</button>`).join("")}</div>
+      <div id="otherbox" hidden><label for="other" class="note">Describe your relationship</label><input type="text" id="other" maxlength="60"></div>
+      <p class="hint" id="whohint" aria-live="polite"></p></div>`;
+  }
+  h += `<div id="qs" ${p === "pillion" ? "hidden" : ""}>` + SPEEDO + qsHtml(P.qs) +
+    `<input class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true"><p class="hint" id="senderr" aria-live="polite"></p><button class="send" id="send">Submit my review</button>
+     <p class="note">Submitting builds your review and opens it in your email app. Nothing is sent until you press send there.</p></div>`;
+  show(h);
+  $("#back").onclick = home;
+  if (p === "pillion") wireWho();
+  wireQs();
+  applySaved();
+}
+
+const SPEEDO = `<div class="speedo" aria-live="polite"><svg viewBox="0 0 200 112" role="img" aria-label="Speedometer showing review progress"><path class="face" d="M10 104 A90 90 0 0 1 190 104 Z"/><path class="redz" d="M164 40 A80 80 0 0 1 180 104"/>${[-72,-54,-36,-18,0,18,36,54,72].map(a => `<line class="tk" x1="100" y1="28" x2="100" y2="38" transform="rotate(${a} 100 100)"/>`).join("")}<line class="nd" id="nd" x1="100" y1="100" x2="100" y2="34"/><circle class="hub" cx="100" cy="100" r="7"/></svg><div><b id="spd">0 km/h</b><span id="spl">Idling. Answer to rev up.</span></div></div>`;
+function speedo(){
+  if (!path || !$("#nd") || speedo.hold > Date.now()) return;
+  const req = PATHS[path].qs.filter(q => q.t !== "text" && !q.opt), f = req.filter(isDone).length / req.length;
+  $("#nd").style.transform = "rotate(" + (-90 + f * 180) + "deg)";
+  $("#spd").textContent = Math.round(f * 120) + " km/h";
+  $("#spl").textContent = f === 0 ? "Idling... talk to me!" : f < .5 ? "Here we go!" : f < 1 ? "Cruising nicely, almost there." : "Full throttle! Send it when you're ready.";
+}
+const GROUPS = {ride: "Tell me about our ride"};
+function qsHtml(list){
+  let out = "", i = 0;
+  while (i < list.length) {
+    const q = list[i];
+    if (q.grp) {
+      let inner = "", j = i;
+      while (j < list.length && list[j].grp === q.grp) { inner += qHtml(list[j], j).replace('<div class="card" data-q=', '<div class="sub" data-q='); j++; }
+      out += `<div class="card"><h2>${esc(GROUPS[q.grp])}</h2>${inner}</div>`; i = j;
+    } else { out += qHtml(q, i); i++; }
+  }
+  return out;
+}
+function today(){ const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+function qHtml(q, i){
+  const n = "";
+  if (q.t === "dial") return `<div class="card" data-q="${q.id}">${n}<h2>${esc((MAYA[path] && MAYA[path][q.id]) || q.q)}</h2>
+    <svg class="dial" viewBox="0 0 200 120" role="img" aria-label="Rating dial"><path class="track" d="M20 105 A80 80 0 0 1 180 105" fill="none" stroke-width="14" stroke-linecap="round"/>
+    <path class="arc" id="arc" d="M20 105 A80 80 0 0 1 180 105" fill="none" stroke-width="14" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+    <text x="100" y="88" text-anchor="middle" id="dnum">&ndash;</text><text x="100" y="108" text-anchor="middle" class="sub">out of 10</text></svg>
+    <div class="nums">${[1,2,3,4,5,6,7,8,9,10].map(v => `<button class="chip" data-v="${v}" aria-pressed="false">${v}</button>`).join("")}</div><div class="react" hidden></div></div>`;
+  if (q.t === "multi") return `<div class="card" data-q="${q.id}">${n}<h2>${esc(T(q))}</h2><div class="chips">${q.o.map((o, k) => `<button class="chip" data-k="${k}" aria-pressed="false">${esc(o)}</button>`).join("")}</div><label class="note" for="${q.id}t" style="display:block;margin-top:12px">Or write your own message</label><textarea id="${q.id}t" rows="2" maxlength="300"></textarea><div class="react" hidden></div></div>`;
+  if (q.t === "num") return `<div class="card" data-q="${q.id}">${n}<h2>${esc(T(q))}</h2><div style="display:flex;gap:8px;align-items:center"><input type="number" inputmode="numeric" min="1" max="3000" step="1" placeholder="e.g. 45" style="max-width:160px" aria-label="Kilometres"> <span class="note">km</span></div><div class="react" hidden></div></div>`;
+  if (q.t === "date") return `<div class="card" data-q="${q.id}">${n}<h2>${esc(T(q))}</h2><input type="date" min="${today()}" aria-label="Next ride date"><div class="chips" style="margin-top:10px"><button class="chip" aria-pressed="false">Not sure yet</button></div><div class="react" hidden></div></div>`;
+  if (q.t === "text") return `<div class="card" data-q="${q.id}">${n}<h2>${esc((MAYA[path] && MAYA[path][q.id]) || q.q)}</h2><textarea rows="3" maxlength="500" placeholder="Optional"></textarea></div>`;
+  return `<div class="card" data-q="${q.id}">${n}<h2>${esc((MAYA[path] && MAYA[path][q.id]) || q.q)}</h2><div class="chips">${q.o.map((o, k) => `<button class="chip" data-k="${k}" aria-pressed="false">${esc(o)}</button>`).join("")}</div>${q.o.includes("Other") ? '<input type="text" class="oth" maxlength="60" placeholder="Please describe" hidden>' : ""}${q.fu ? '<input type="text" class="fu" maxlength="200" placeholder="What would make it better? (optional)" hidden>' : ""}<div class="react" hidden></div></div>`;
+}
+
+function wireWho(){
+  const upd = () => {
+    st.name = $("#pname").value.trim();
+    st.other = $("#other").value.trim();
+    $("#otherbox").hidden = st.rel !== "Other";
+    const rel = st.rel === "Other" ? st.other : st.rel;
+    const miss = [];
+    if (st.name.length < 2) miss.push("your name");
+    if (!st.rel) miss.push("how you know " + OWNER);
+    else if (st.rel === "Other" && st.other.length < 2) miss.push("your relationship to " + OWNER);
+    $("#whohint").textContent = miss.length ? "To continue, add " + miss.join(" and ") + "." : "";
+    const ok = !miss.length, qs = $("#qs");
+    if (ok && qs.hidden) { qs.hidden = false; }
+    if (!ok) qs.hidden = true;
+    st.relText = rel;
+  };
+  $("#pname").oninput = $("#other").oninput = upd;
+  $("#rels").querySelectorAll(".chip").forEach(b => b.onclick = () => {
+    st.rel = b.dataset.r;
+    $("#rels").querySelectorAll(".chip").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); });
+    upd();
+    if (st.rel === "Other") $("#other").focus();
+  });
+}
+
+function wireQs(){
+  const qs = PATHS[path].qs;
+  app.querySelectorAll("[data-q]").forEach(card => {
+    const q = qs.find(x => x.id === card.dataset.q), re = $(".react", card);
+    const fu0 = $(".fu", card); if (fu0) fu0.oninput = () => st[q.id + "Fu"] = fu0.value.trim();
+    const oth0 = $(".oth", card); if (oth0) oth0.oninput = () => st[q.id + "Other"] = oth0.value.trim();
+    if (q.t === "dial") card.querySelectorAll(".chip").forEach(b => b.onclick = () => {
+      const v = +b.dataset.v; st[q.id] = v;
+      card.querySelectorAll(".chip").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); });
+      $("#arc").style.strokeDashoffset = 100 - v * 10; $("#dnum").textContent = v; rev(v);
+      react(re, DIAL_R.find(r => v <= r[0])[1]);
+    });
+    else if (q.t === "multi") {
+      const sel = new Set(st[q.id] || []);
+      card.querySelectorAll(".chip").forEach(b => { const on = sel.has(q.o[+b.dataset.k]); b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); b.onclick = () => { const o = q.o[+b.dataset.k]; if (sel.has(o)) sel.delete(o); else sel.add(o); st[q.id] = [...sel]; const now = sel.has(o); b.classList.toggle("on", now); b.setAttribute("aria-pressed", now); if (now) react(re, q.r); }; });
+      $("textarea", card).oninput = e => st[q.id + "Txt"] = e.target.value.trim();
+    }
+    else if (q.t === "num") {
+      const i = $("input", card);
+      i.oninput = () => { const v = i.value.trim(); if (v === "" || +v <= 0) delete st[q.id]; else st[q.id] = String(+v); };
+      i.onchange = () => { if (st[q.id]) { const km = +st[q.id]; react(re, km < 20 ? q.r[0] : km < 100 ? q.r[1] : q.r[2]); } };
+    }
+    else if (q.t === "date") {
+      const i = $("input", card), nb = $(".chip", card);
+      i.onchange = () => { if (!i.value) { delete st[q.id]; return; } st[q.id] = i.value; nb.classList.remove("on"); nb.setAttribute("aria-pressed", false); react(re, q.r[0]); };
+      nb.onclick = () => { st[q.id] = "Not sure yet"; i.value = ""; nb.classList.add("on"); nb.setAttribute("aria-pressed", true); react(re, q.r[1]); };
+    }
+    else if (q.t === "text") $("textarea", card).oninput = e => st[q.id] = e.target.value.trim();
+    else card.querySelectorAll(".chip").forEach(b => b.onclick = () => {
+      const k = +b.dataset.k; st[q.id] = q.o[k];
+      card.querySelectorAll(".chip").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); });
+      const oth = $(".oth", card); if (oth) { oth.hidden = st[q.id] !== "Other"; if (!oth.hidden) oth.focus(); }
+      const fu = $(".fu", card); if (fu) fu.hidden = !(q.fu || []).includes(st[q.id]);
+      react(re, q.r[k]);
+    });
+  });
+  $("#send").onclick = submit;
+  ["click", "input", "change"].forEach(ev => $("#qs").addEventListener(ev, () => setTimeout(speedo, 0)));
+  speedo();
+}
+
+function react(el, msg){ el.hidden = false; el.textContent = ""; el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; el.dataset.m = msg; el.textContent = msg; }
+
+async function submit(){
+  const err = $("#senderr");
+  if (path === "pillion") {
+    const rel = st.rel === "Other" ? (st.other || "") : (st.rel || "");
+    if ((st.name || "").length < 2 || rel.length < 2) { err.textContent = "Please add your name and relationship to " + OWNER + " first."; $("#who").scrollIntoView({block:"center"}); return; }
+  }
+  const qs = PATHS[path].qs;
+  const missing = qs.filter(q => !isDone(q));
+  if (missing.length) { err.textContent = "Please answer every question. Only the optional ones can be skipped."; app.querySelector(`[data-q="${missing[0].id}"]`).scrollIntoView({block:"center"}); return; }
+  if (!st._ok) { review(); return; }
+  if (st._hp) { st._done = true; show('<div class="card done"><h2>Thank you!</h2></div>'); return; }
+  if (busy) return; busy = true; st._ok = false;
+  const L = [PATHS[path].title, ""];
+  if (path === "pillion") L.push("Passenger name: " + st.name, "Relationship to " + OWNER + ": " + (st.rel === "Other" ? st.other : st.rel), "");
+  qs.forEach(q => L.push(q.q + "\n  " + ans(q)));
+  const body = L.join("\n"), subject = "Maya Motor Club review: " + PATHS[path].title;
+  const mail = "mailto:" + encodeURIComponent(RECIPIENT) + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+  let sent = false, why = "";
+  if (ENDPOINT) { try { const r = await fetch(ENDPOINT, {method: "POST", headers: {"Content-Type": "text/plain"}, body: JSON.stringify({id: Date.now() + "-" + Math.random().toString(36).slice(2), subject, review: body})}); const j = await r.json().catch(() => ({})); sent = r.ok && j.ok === true; if (!sent) why = "The email service did not confirm delivery."; } catch (e) { why = "Could not reach the email service."; } }
+  busy = false; st._done = true; if (sent) clearSaved();
+  show(`<div class="card done"><svg viewBox="0 0 64 64" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><circle class="ring" cx="32" cy="32" r="28"/><path class="tick" d="M20 33l9 9 16-18"/></svg>
+    <p style="margin:0 0 6px;font-style:italic;color:var(--red)">Thanks${st.name ? ", " + esc(st.name.split(" ")[0]) : ""}! Ride safe. I'll be waiting. &mdash; Maya</p><h2>${sent ? "Sent. Thank you!" : "Review ready. Thank you!"}</h2><p class="note">${sent ? "The email service confirmed delivery." : (why ? esc(why) + " " : "") + "It has <b>not</b> been sent yet. Open it in your email app and press send, or copy it."}</p>
+    <pre id="sum">${esc(body)}</pre>
+    <div class="row"><a class="send" style="text-decoration:none" href="${mail}">Open in email app</a><button class="send ghost" id="copy">Copy review</button>${navigator.share ? '<button class="send ghost" id="share">Share my rating</button>' : ""}</div>
+    <p class="note" id="cm" aria-live="polite"></p><button class="link" id="again">Write another review</button></div>`);
+  $("#copy").onclick = () => { (navigator.clipboard ? navigator.clipboard.writeText(body) : Promise.reject()).then(() => $("#cm").textContent = "Copied.", () => { const r = document.createRange(); r.selectNodeContents($("#sum")); getSelection().removeAllRanges(); getSelection().addRange(r); $("#cm").textContent = "Press copy on your device to finish."; }); };
+  const sh = $("#share"); if (sh) sh.onclick = () => navigator.share({title: "Maya Motor Club", text: "I rated my ride with Maya (Yamaha XSR 155) " + st.rating + "/10!"}).catch(() => {});
+  $("#again").onclick = () => { clearSaved(); home(); };
+}
+home();
+</script>
+</body>
+</html>
