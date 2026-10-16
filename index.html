@@ -26,7 +26,7 @@ header p{margin:0;color:var(--mute);font-style:italic}
 .chip{font:600 15px system-ui,sans-serif;background:transparent;color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:9px 14px;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .15s}
 .chip:hover{border-color:var(--gold)}
 .chip.on{background:var(--red);border-color:var(--red);color:#fff8ea;animation:pop .4s ease}
-input[type=text],textarea{width:100%;font:16px system-ui,sans-serif;padding:11px;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);margin-top:8px}
+input[type=text],input[type=email],textarea{width:100%;font:16px system-ui,sans-serif;padding:11px;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);margin-top:8px}
 input:focus,textarea:focus,.chip:focus-visible,.big:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 input[type=number],input[type=date]{font:16px system-ui,sans-serif;padding:11px;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);margin-top:8px;color-scheme:light dark}
 .sub{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
@@ -80,7 +80,7 @@ const OWNER = "Sai Krish";
 // Optional: URL of your own email service (Apps Script, Formspree, serverless function). It works when this file is
 // self-hosted on your own site; published claude.ai pages block outside requests, so they fall back to the email app.
 // The page only says "Sent" if the service replies OK.
-const ENDPOINT = "https://script.google.com/macros/s/AKfycbzwZueTpJyTmnQY7lQ312IdY_dffhQu70GJ3FsOIAcT9i92Jjq1ZhwE924gnoR8FSzqBw/exec";
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbzNXPd4-p9cth8WNemO_s0Z1h1r62-uFdgyKBJbq8fbTDgYEO2PbG-CBfC4wyHhb0wChw/exec";
 
 const RELS = ["Family member","Friend","Partner","Colleague","Other"];
 const PURPOSE = {id:"purpose",grp:"ride",q:"Why did you ride with us?",o:["Leisure ride","Trip or outing","Errand or commute","Event or function","Just for fun","Other"],r:["Leisure it is. My favourite kind.","Adventures are my thing!","Happy to be useful.","I do like an occasion.","Fun is what I'm for.","Interesting! Tell me more."]};
@@ -139,6 +139,7 @@ const DIAL_R = [[3,"Rough ride. Tell me what went wrong."],[5,"Hmm, below par. I
 const app = document.getElementById("app");
 let path = null, st = {};
 const $ = (s, r=document) => r.querySelector(s);
+const validEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e || "");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 let busy = false;
@@ -157,11 +158,13 @@ function rev(v){
 }
 function applySaved(){
   if (path === "rider" && st.name) $("#rname").value = st.name;
+  if (path === "rider" && st.email) $("#remail").value = st.email;
   if (path === "pillion") {
     if (st.name) $("#pname").value = st.name;
+    if (st.email) $("#pemail").value = st.email;
     if (st.other) $("#other").value = st.other;
     const b = st.rel && [...app.querySelectorAll("#rels .chip")].find(x => x.dataset.r === st.rel);
-    if (b) b.click(); else if (st.name || st.other) $("#pname").dispatchEvent(new Event("input"));
+    if (b) b.click(); else if (st.name || st.other || st.email) $("#pname").dispatchEvent(new Event("input"));
   }
   PATHS[path].qs.forEach(q => {
     const card = app.querySelector('[data-q="' + q.id + '"]'); if (!card) return;
@@ -178,8 +181,8 @@ function applySaved(){
 function review(){
   const hp = $("#hp"); if (hp && hp.value) st._hp = 1;
   const rows = [];
-  if (path === "rider") rows.push(["Rider name", st.name]);
-  if (path === "pillion") rows.push(["Passenger", st.name], ["Relationship to " + OWNER, st.rel === "Other" ? st.other : st.rel]);
+  if (path === "rider") rows.push(["Rider name", st.name], ["Email id", st.email]);
+  if (path === "pillion") rows.push(["Passenger", st.name], ["Email id", st.email], ["Relationship to " + OWNER, st.rel === "Other" ? st.other : st.rel]);
   PATHS[path].qs.forEach(q => rows.push([q.q, ans(q)]));
   show(`<div class="card"><span class="n">CHECK YOUR REVIEW</span><h2>Here's what you told me. Ready to send?</h2>${rows.map(r => `<p style="margin:8px 0"><span class="note">${esc(r[0])}</span><br><b>${esc(r[1])}</b></p>`).join("")}<div class="row"><button class="send ghost" id="edit">Edit answers</button><button class="send" id="ok">Looks good</button></div></div>`);
   $("#edit").onclick = () => start(path);
@@ -206,19 +209,21 @@ function start(p){
     h += `<div class="card" id="who"><span class="n">FIRST, WHO ARE YOU?</span><h2>Hello! Who sat on my back seat with ${esc(OWNER)}?</h2>
       <label for="pname" class="note">Your name (required)</label>
       <input type="text" id="pname" autocomplete="name" maxlength="60">
+      <label for="pemail" class="note" style="display:block;margin-top:12px">Your email id (required)</label>
+      <input type="email" id="pemail" autocomplete="email" maxlength="100" inputmode="email">
       <p class="note" style="margin:14px 0 0">How do you know ${esc(OWNER)}? (required)</p>
       <div class="chips" id="rels" role="group" aria-label="Relationship" style="margin-top:8px">${RELS.map(r => `<button class="chip" data-r="${r}" aria-pressed="false">${r}</button>`).join("")}</div>
       <div id="otherbox" hidden><label for="other" class="note">Describe your relationship</label><input type="text" id="other" maxlength="60"></div>
       <p class="hint" id="whohint" aria-live="polite"></p></div>`;
   }
-  if (p === "rider") h += `<div class="card" id="who"><span class="n">FIRST, WHO ARE YOU?</span><h2>Hi! What's your name?</h2><label for="rname" class="note">Your name (required)</label><input type="text" id="rname" autocomplete="name" maxlength="60"><p class="hint" id="whohint" aria-live="polite"></p></div>`;
+  if (p === "rider") h += `<div class="card" id="who"><span class="n">FIRST, WHO ARE YOU?</span><h2>Hi! What's your name?</h2><label for="rname" class="note">Your name (required)</label><input type="text" id="rname" autocomplete="name" maxlength="60"><label for="remail" class="note" style="display:block;margin-top:12px">Your email id (required)</label><input type="email" id="remail" autocomplete="email" maxlength="100" inputmode="email"><p class="hint" id="whohint" aria-live="polite"></p></div>`;
   h += `<div id="qs" ${p === "pillion" ? "hidden" : ""}>` + SPEEDO + qsHtml(P.qs) +
     `<input class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true"><p class="hint" id="senderr" aria-live="polite"></p><button class="send" id="send">Submit my review</button>
      <p class="note">${ENDPOINT ? "Submitting sends your review straight to Maya's owner." : "Submitting builds your review and opens it in your email app. Nothing is sent until you press send there."}</p></div>`;
   show(h);
   $("#back").onclick = home;
   if (p === "pillion") wireWho();
-  else { const rn = $("#rname"); rn.oninput = () => { st.name = rn.value.trim(); $("#whohint").textContent = st.name.length < 2 ? "Please add your name." : ""; }; }
+  else { const rn = $("#rname"), rm = $("#remail"); rn.oninput = rm.oninput = () => { st.name = rn.value.trim(); st.email = rm.value.trim(); $("#whohint").textContent = st.name.length < 2 ? "Please add your name." : !validEmail(st.email) ? "Please add a valid email id." : ""; }; }
   wireQs();
   applySaved();
 }
@@ -263,10 +268,12 @@ function wireWho(){
   const upd = () => {
     st.name = $("#pname").value.trim();
     st.other = $("#other").value.trim();
+    st.email = $("#pemail").value.trim();
     $("#otherbox").hidden = st.rel !== "Other";
     const rel = st.rel === "Other" ? st.other : st.rel;
     const miss = [];
     if (st.name.length < 2) miss.push("your name");
+    if (!validEmail(st.email)) miss.push("a valid email id");
     if (!st.rel) miss.push("how you know " + OWNER);
     else if (st.rel === "Other" && st.other.length < 2) miss.push("your relationship to " + OWNER);
     $("#whohint").textContent = miss.length ? "To continue, add " + miss.join(" and ") + "." : "";
@@ -275,7 +282,7 @@ function wireWho(){
     if (!ok) qs.hidden = true;
     st.relText = rel;
   };
-  $("#pname").oninput = $("#other").oninput = upd;
+  $("#pname").oninput = $("#pemail").oninput = $("#other").oninput = upd;
   $("#rels").querySelectorAll(".chip").forEach(b => b.onclick = () => {
     st.rel = b.dataset.r;
     $("#rels").querySelectorAll(".chip").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); });
@@ -329,10 +336,10 @@ function react(el, msg){ el.hidden = false; el.textContent = ""; el.style.animat
 
 async function submit(){
   const err = $("#senderr");
-  if (path === "rider" && (st.name || "").length < 2) { err.textContent = "Please add your name first."; $("#who").scrollIntoView({block:"center"}); return; }
+  if (path === "rider" && ((st.name || "").length < 2 || !validEmail(st.email))) { err.textContent = "Please add your name and a valid email id first."; $("#who").scrollIntoView({block:"center"}); return; }
   if (path === "pillion") {
     const rel = st.rel === "Other" ? (st.other || "") : (st.rel || "");
-    if ((st.name || "").length < 2 || rel.length < 2) { err.textContent = "Please add your name and relationship to " + OWNER + " first."; $("#who").scrollIntoView({block:"center"}); return; }
+    if ((st.name || "").length < 2 || !validEmail(st.email) || rel.length < 2) { err.textContent = "Please add your name, a valid email id and your relationship to " + OWNER + " first."; $("#who").scrollIntoView({block:"center"}); return; }
   }
   const qs = PATHS[path].qs;
   const missing = qs.filter(q => !isDone(q));
@@ -341,13 +348,13 @@ async function submit(){
   if (st._hp) { st._done = true; show('<div class="card done"><h2>Thank you!</h2></div>'); return; }
   if (busy) return; busy = true; st._ok = false;
   const L = [PATHS[path].title, ""];
-  if (path === "rider") L.push("Rider name: " + st.name, "");
-  if (path === "pillion") L.push("Passenger name: " + st.name, "Relationship to " + OWNER + ": " + (st.rel === "Other" ? st.other : st.rel), "");
+  if (path === "rider") L.push("Rider name: " + st.name, "Email id: " + st.email, "");
+  if (path === "pillion") L.push("Passenger name: " + st.name, "Email id: " + st.email, "Relationship to " + OWNER + ": " + (st.rel === "Other" ? st.other : st.rel), "");
   qs.forEach(q => L.push(q.q + "\n  " + ans(q)));
   const body = L.join("\n"), subject = "Maya Motor Club: " + (st.name || "New review") + " - " + PATHS[path].title;
   const mail = "mailto:" + encodeURIComponent(RECIPIENT) + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
   let sent = false, why = "";
-  if (ENDPOINT) { try { const r = await fetch(ENDPOINT, {method: "POST", headers: {"Content-Type": "text/plain"}, body: JSON.stringify({id: Date.now() + "-" + Math.random().toString(36).slice(2), subject, review: body})}); const j = await r.json().catch(() => ({})); sent = r.ok && j.ok === true; if (!sent) why = "The email service did not confirm delivery."; } catch (e) { why = "Could not reach the email service."; } }
+  if (ENDPOINT) { try { const r = await fetch(ENDPOINT, {method: "POST", headers: {"Content-Type": "text/plain"}, body: JSON.stringify({id: Date.now() + "-" + Math.random().toString(36).slice(2), subject, review: body, email: st.email})}); const j = await r.json().catch(() => ({})); sent = r.ok && j.ok === true; if (!sent) why = "The email service did not confirm delivery."; } catch (e) { why = "Could not reach the email service."; } }
   busy = false; st._done = true; if (sent) clearSaved();
   show(`<div class="card done"><svg viewBox="0 0 64 64" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><circle class="ring" cx="32" cy="32" r="28"/><path class="tick" d="M20 33l9 9 16-18"/></svg>
     <p style="margin:0 0 6px;font-style:italic;color:var(--red)">Thanks${st.name ? ", " + esc(st.name.split(" ")[0]) : ""}! Ride safe. I'll be waiting. &mdash; Maya</p><h2>${sent ? "Sent. Thank you!" : "Review ready. Thank you!"}</h2><p class="note">${sent ? "The email service confirmed delivery." : (why ? esc(why) + " " : "") + "It has <b>not</b> been sent yet. Open it in your email app and press send, or copy it."}</p>
