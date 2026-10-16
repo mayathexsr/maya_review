@@ -156,6 +156,7 @@ function rev(v){
   clearTimeout(rev.t); rev.t = setTimeout(speedo, 1050);
 }
 function applySaved(){
+  if (path === "rider" && st.name) $("#rname").value = st.name;
   if (path === "pillion") {
     if (st.name) $("#pname").value = st.name;
     if (st.other) $("#other").value = st.other;
@@ -177,6 +178,7 @@ function applySaved(){
 function review(){
   const hp = $("#hp"); if (hp && hp.value) st._hp = 1;
   const rows = [];
+  if (path === "rider") rows.push(["Rider name", st.name]);
   if (path === "pillion") rows.push(["Passenger", st.name], ["Relationship to " + OWNER, st.rel === "Other" ? st.other : st.rel]);
   PATHS[path].qs.forEach(q => rows.push([q.q, ans(q)]));
   show(`<div class="card"><span class="n">CHECK YOUR REVIEW</span><h2>Here's what you told me. Ready to send?</h2>${rows.map(r => `<p style="margin:8px 0"><span class="note">${esc(r[0])}</span><br><b>${esc(r[1])}</b></p>`).join("")}<div class="row"><button class="send ghost" id="edit">Edit answers</button><button class="send" id="ok">Looks good</button></div></div>`);
@@ -209,12 +211,14 @@ function start(p){
       <div id="otherbox" hidden><label for="other" class="note">Describe your relationship</label><input type="text" id="other" maxlength="60"></div>
       <p class="hint" id="whohint" aria-live="polite"></p></div>`;
   }
+  if (p === "rider") h += `<div class="card" id="who"><span class="n">FIRST, WHO ARE YOU?</span><h2>Hi! What's your name?</h2><label for="rname" class="note">Your name (required)</label><input type="text" id="rname" autocomplete="name" maxlength="60"><p class="hint" id="whohint" aria-live="polite"></p></div>`;
   h += `<div id="qs" ${p === "pillion" ? "hidden" : ""}>` + SPEEDO + qsHtml(P.qs) +
     `<input class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true"><p class="hint" id="senderr" aria-live="polite"></p><button class="send" id="send">Submit my review</button>
-     <p class="note">Submitting builds your review and opens it in your email app. Nothing is sent until you press send there.</p></div>`;
+     <p class="note">${ENDPOINT ? "Submitting sends your review straight to Maya's owner." : "Submitting builds your review and opens it in your email app. Nothing is sent until you press send there."}</p></div>`;
   show(h);
   $("#back").onclick = home;
   if (p === "pillion") wireWho();
+  else { const rn = $("#rname"); rn.oninput = () => { st.name = rn.value.trim(); $("#whohint").textContent = st.name.length < 2 ? "Please add your name." : ""; }; }
   wireQs();
   applySaved();
 }
@@ -325,6 +329,7 @@ function react(el, msg){ el.hidden = false; el.textContent = ""; el.style.animat
 
 async function submit(){
   const err = $("#senderr");
+  if (path === "rider" && (st.name || "").length < 2) { err.textContent = "Please add your name first."; $("#who").scrollIntoView({block:"center"}); return; }
   if (path === "pillion") {
     const rel = st.rel === "Other" ? (st.other || "") : (st.rel || "");
     if ((st.name || "").length < 2 || rel.length < 2) { err.textContent = "Please add your name and relationship to " + OWNER + " first."; $("#who").scrollIntoView({block:"center"}); return; }
@@ -336,9 +341,10 @@ async function submit(){
   if (st._hp) { st._done = true; show('<div class="card done"><h2>Thank you!</h2></div>'); return; }
   if (busy) return; busy = true; st._ok = false;
   const L = [PATHS[path].title, ""];
+  if (path === "rider") L.push("Rider name: " + st.name, "");
   if (path === "pillion") L.push("Passenger name: " + st.name, "Relationship to " + OWNER + ": " + (st.rel === "Other" ? st.other : st.rel), "");
   qs.forEach(q => L.push(q.q + "\n  " + ans(q)));
-  const body = L.join("\n"), subject = "Maya Motor Club review: " + PATHS[path].title;
+  const body = L.join("\n"), subject = "Maya Motor Club: " + (st.name || "New review") + " - " + PATHS[path].title;
   const mail = "mailto:" + encodeURIComponent(RECIPIENT) + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
   let sent = false, why = "";
   if (ENDPOINT) { try { const r = await fetch(ENDPOINT, {method: "POST", headers: {"Content-Type": "text/plain"}, body: JSON.stringify({id: Date.now() + "-" + Math.random().toString(36).slice(2), subject, review: body})}); const j = await r.json().catch(() => ({})); sent = r.ok && j.ok === true; if (!sent) why = "The email service did not confirm delivery."; } catch (e) { why = "Could not reach the email service."; } }
